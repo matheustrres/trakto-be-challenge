@@ -6,6 +6,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BrokerModule } from './shared/modules/broker/broker.module';
 
 import { GlobalExceptionFilter } from '@/shared/lib/exceptions/global-exception-filter';
 import { ZodExceptionFilter } from '@/shared/lib/exceptions/zod-exception-filter';
@@ -15,6 +16,7 @@ const exceptionFilters = [GlobalExceptionFilter, ZodExceptionFilter];
 
 @Module({
 	imports: [
+		BrokerModule,
 		DatabaseModule,
 		LoggerModule.forRoot({
 			pinoHttp: {
