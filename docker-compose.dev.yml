@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: trakto_api_dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - pnpm-store:/root/.local/share/pnpm/store/v3
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-tier
+
+volumes:
+  pnpm-store:
+
+networks:
+  app-tier:
