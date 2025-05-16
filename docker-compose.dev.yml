@@ -12,7 +12,7 @@ services:
       - ./:/app
       - pnpm-store:/root/.local/share/pnpm/store/v3
     ports:
-      - '3000:3000'
+      - ${PORT}:${PORT}
     depends_on:
       - mongo
       - rabbitmq

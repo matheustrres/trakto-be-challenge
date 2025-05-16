@@ -44,7 +44,7 @@ services:
     container_name: trakto_rabbitmq
     restart: unless-stopped
     ports:
-      - 5672:5672
+      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}

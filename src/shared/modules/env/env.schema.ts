@@ -7,8 +7,11 @@ export const envSchema = z.object({
 	MONGODB_DATABASE: z.coerce.string().default('trakto'),
 	MONGODB_PORT: z.coerce.number().default(27017),
 	MONGODB_URI: z.coerce.string().startsWith('mongodb://'),
-  RABBITMQ_USER: z.coerce.string().default('guest'),
-  RABBITMQ_PASSWORD: z.coerce.string().default('guest'),
+	RABBITMQ_USER: z.coerce.string().default('guest'),
+	RABBITMQ_PASSWORD: z.coerce.string().default('guest'),
+	RABBITMQ_PORT: z.coerce.number().default(5672),
+	RABBITMQ_HOST: z.coerce.string().default('rabbitmq'),
+	RABBITMQ_URL: z.coerce.string().default('amqp://guest:guest@rabbitmq:5672'),
 });
 
 export type Env = z.infer<typeof envSchema>;
