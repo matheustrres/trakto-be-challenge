@@ -3,7 +3,7 @@ import { z } from 'zod';
 const defaultMongoUser = 'root';
 const defaultMongoPassword = 'pass';
 const defaultMongoDatabase = 'trakto';
-const defaultMongoHost = 'localhost';
+const defaultMongoHost = 'mongo';
 const defaultMongoPort = 27017;
 const defaultMongoUri = `mongodb://${defaultMongoUser}:${defaultMongoPassword}@${defaultMongoHost}:${defaultMongoPort}/${defaultMongoDatabase}?authSource=admin`;
 
@@ -28,6 +28,7 @@ export const envSchema = z.object({
 	RABBITMQ_PORT: z.coerce.number().default(defaultRabbitMQPort),
 	RABBITMQ_HOST: z.coerce.string().default(defaultRabbitMQHost),
 	RABBITMQ_URL: z.coerce.string().default(defaultRabbitMQUrl),
+	RABBITMQ_IMAGE_OPTIMIZE_QUEUE: z.coerce.string().default('image.optimize'),
 });
 
 export type Env = z.infer<typeof envSchema>;

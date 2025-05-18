@@ -48,3 +48,19 @@ ENV NODE_ENV=development
 EXPOSE 3000 9229
 
 CMD [ "pnpm", "run", "start:dev" ]
+
+######## Worker ########
+FROM node:22-slim AS worker
+
+RUN corepack enable && corepack prepare pnpm@9.3.0 --activate
+
+WORKDIR /app
+
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+COPY --from=builder /app/dist ./dist   
+
+ENV NODE_ENV=production
+
+CMD ["node", "dist/workers/main-worker.js"]
+

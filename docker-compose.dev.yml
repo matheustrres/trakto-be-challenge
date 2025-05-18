@@ -13,11 +13,7 @@ services:
       - pnpm-store:/root/.local/share/pnpm/store/v3
     ports:
       - ${PORT}:${PORT}
-    depends_on:
-      - mongo
-      - rabbitmq
-    networks:
-      - app-tier
+    networks: [app-tier]
 
 volumes:
   pnpm-store:

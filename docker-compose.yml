@@ -1,28 +1,5 @@
+version: '3.9'
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: prod
-    container_name: trakto_api
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - MONGODB_URI=mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:${MONGODB_PORT}/${MONGODB_DATABASE}?authSource=admin
-      - MONGODB_DATABASE=${MONGODB_DATABASE}
-      - MONGODB_USER=${MONGODB_USER}
-      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-    depends_on:
-      - mongo
-      - rabbitmq
-    ports:
-      - ${PORT}:${PORT}
-    networks:
-      - app-tier
-
   mongo:
     image: rapidfort/mongodb-official:7.0.17-jammy
     container_name: trakto_mongodb
@@ -32,24 +9,70 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.runCommand({ ping: 1 })']
+      interval: 5s
+      retries: 5
     volumes:
       - mongo-data:/data/db
     ports:
       - ${MONGODB_PORT}:${MONGODB_PORT}
-    networks:
-      - app-tier
+    networks: [app-tier]
 
   rabbitmq:
-    image: rabbitmq:3.13-alpine 
+    image: rabbitmq:3.13-alpine
     container_name: trakto_rabbitmq
     restart: unless-stopped
-    ports:
-      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-    networks:
-      - app-tier
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 5s
+      retries: 5
+    ports:
+      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
+    networks: [app-tier]
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    container_name: trakto_api
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - uploads-data:/tmp/uploads
+      - images-data:/images
+    networks: [app-tier]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    container_name: trakto_worker
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      api:
+        condition: service_started
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - uploads-data:/tmp/uploads
+      - images-data:/images
+    networks: [app-tier]
 
 networks:
   app-tier:
@@ -57,3 +80,5 @@ networks:
 
 volumes:
   mongo-data:
+  images-data:
+  uploads-data:
