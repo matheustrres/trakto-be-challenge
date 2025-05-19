@@ -28,6 +28,7 @@ module.exports = {
 					'/^@/app/',
 					'/^@/consts/',
 					'/^@/shared/',
+					'/^@/workers/',
 					'/^#/',
 				],
 				alphabetize: {
