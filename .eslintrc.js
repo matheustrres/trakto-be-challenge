@@ -26,6 +26,7 @@ module.exports = {
 					'sibling',
 					'parent',
 					'/^@/app/',
+					'/^@/consts/',
 					'/^@/shared/',
 					'/^#/',
 				],

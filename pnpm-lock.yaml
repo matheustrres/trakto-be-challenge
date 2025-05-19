@@ -38,6 +38,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
+      exif-reader:
+        specifier: ^2.0.2
+        version: 2.0.2
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -1900,6 +1903,9 @@ packages:
   executable@4.1.1:
     resolution: {integrity: sha512-8iA79xD3uAch729dUG8xaaBBFGaEa0wdD2VkYLFHwlqosEj/jT66AzcreRDSgV7ehnNLBW2WR5jIXwGKjVdTLg==}
     engines: {node: '>=4'}
+
+  exif-reader@2.0.2:
+    resolution: {integrity: sha512-CVFqcwdwFe2GnbbW7/Q7sUhVP5Ilaw7fuXQc6ad3AbX20uGfHhXTpkF/hQHPrtOuys9elFVgsUkvwfhfvjDa1A==}
 
   exit@0.1.2:
     resolution: {integrity: sha512-Zk/eNKV2zbjpKzrsQ+n1G6poVbErQxJ0LBOJXaKZ1EViLzH+hrLu9cdXI4zw9dBQJslwBEpbQ2P1oS7nDxs6jQ==}
@@ -5868,6 +5874,8 @@ snapshots:
   executable@4.1.1:
     dependencies:
       pify: 2.3.0
+
+  exif-reader@2.0.2: {}
 
   exit@0.1.2: {}
 

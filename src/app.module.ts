@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { LoggerModule } from 'nestjs-pino';
 
 import { AppController } from './app.controller';
@@ -18,6 +20,9 @@ const exceptionFilters = [GlobalExceptionFilter, ZodExceptionFilter];
 	imports: [
 		BrokerModule,
 		DatabaseModule,
+		MulterModule.register({
+			storage: memoryStorage(),
+		}),
 		LoggerModule.forRoot({
 			pinoHttp: {
 				level: process.env['NODE_ENV'] === 'production' ? 'info' : 'debug',
@@ -38,7 +43,6 @@ const exceptionFilters = [GlobalExceptionFilter, ZodExceptionFilter];
 						id: req.id,
 						method: req.method,
 						url: req.url,
-						remoteAddress: req.socket.remoteAddress,
 					}),
 					res: (res) => ({
 						statusCode: res.statusCode,
