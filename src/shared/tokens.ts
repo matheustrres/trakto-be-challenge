@@ -1,2 +1,0 @@
-export const RABBITMQ_CHANNEL_TOKEN = 'RABBITMQ_CHANNEL';
-export const RABBITMQ_IMAGE_OPTIMIZE_QUEUE = 'image.optimize';

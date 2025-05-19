@@ -2,12 +2,16 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { DatabaseService } from './database.service';
+import { ImageTask, ImageTaskSchema } from './schemas/image-task.schema';
 
 import { EnvModule } from '@/shared/modules/env/env.module';
 import { EnvService } from '@/shared/modules/env/env.service';
 
 @Module({
 	imports: [
+		MongooseModule.forFeature([
+			{ name: ImageTask.name, schema: ImageTaskSchema },
+		]),
 		MongooseModule.forRootAsync({
 			imports: [EnvModule],
 			useFactory: (envService: EnvService) => ({
@@ -22,6 +26,6 @@ import { EnvService } from '@/shared/modules/env/env.service';
 		}),
 	],
 	providers: [DatabaseService],
-	exports: [DatabaseService],
+	exports: [DatabaseService, MongooseModule],
 })
 export class DatabaseModule {}
