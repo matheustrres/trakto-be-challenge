@@ -1,6 +1,7 @@
 import {
 	Controller,
 	Get,
+	Param,
 	Post,
 	UploadedFile,
 	UseInterceptors,
@@ -8,6 +9,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { AppService } from '@/app.service';
+
+import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
 
 @Controller()
 export class AppController {
@@ -20,7 +23,18 @@ export class AppController {
 
 	@Post('/upload')
 	@UseInterceptors(FileInterceptor('image'))
-	async upload(@UploadedFile() file: Express.Multer.File) {
+	async upload(@UploadedFile() file: Express.Multer.File): Promise<{
+		taskId: string;
+		status: ImageTaskStatusEnum;
+	}> {
 		return await this.appService.enqueueImage(file);
+	}
+
+	@Get('/status/:taskId')
+	async getStatus(
+		@Param('taskId') taskId: string,
+	): Promise<{ status: ImageTaskStatusEnum }> {
+		const status = await this.appService.getImageTaskStatus(taskId);
+		return { status };
 	}
 }

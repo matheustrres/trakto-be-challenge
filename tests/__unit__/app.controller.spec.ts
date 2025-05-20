@@ -3,10 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 
-import { ImageProducerService } from '@/shared/modules/broker/services/image-producer.service';
-
-import { ImageProcessorService } from '@/workers/image-processor/image-processor.service';
-
 describe('AppController', () => {
 	let appController: AppController;
 
@@ -14,18 +10,12 @@ describe('AppController', () => {
 		const app: TestingModule = await Test.createTestingModule({
 			controllers: [AppController],
 			providers: [
-				AppService,
 				{
-					provide: ImageProcessorService,
+					provide: AppService,
 					useValue: {
-						onModuleInit: jest.fn(),
-						handleMessage: jest.fn(),
-					},
-				},
-				{
-					provide: ImageProducerService,
-					useValue: {
-						enqueue: jest.fn(),
+						getHello: jest.fn().mockReturnValue('Hello World!'),
+						enqueueImage: jest.fn(),
+						getImageTaskStatus: jest.fn(),
 					},
 				},
 			],
