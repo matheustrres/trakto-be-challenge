@@ -20,19 +20,21 @@ services:
     networks: [app-tier]
 
   rabbitmq:
-    image: rabbitmq:3.13-alpine
+    image: rabbitmq:3.13-management-alpine
     container_name: trakto_rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     healthcheck:
+    
       test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 5s
       retries: 5
     ports:
       - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
-    networks: [app-tier]
+      - "15672:15672" # UI
+    networks: [app-tier]  
 
   api:
     build:

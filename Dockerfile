@@ -62,5 +62,5 @@ COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
 
-CMD ["node", "dist/workers/main-worker.js"]
+CMD ["node", "dist/shared/libs/rmq/workers/main-worker.js"]
 

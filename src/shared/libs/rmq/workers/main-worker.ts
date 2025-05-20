@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 
-import { WorkersModule } from './image-processor/image-processor.module';
+import { RmqWorkerModule } from './rmq-worker.module';
 
 async function bootstrap() {
-	await NestFactory.createApplicationContext(WorkersModule);
+	await NestFactory.createApplicationContext(RmqWorkerModule);
 }
 
 bootstrap().catch((err) => {

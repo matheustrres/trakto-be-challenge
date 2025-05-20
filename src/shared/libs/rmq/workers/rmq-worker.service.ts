@@ -6,7 +6,7 @@ import { Channel, ConsumeMessage } from 'amqplib';
 import { Model } from 'mongoose';
 import sharp from 'sharp';
 
-import { RABBITMQ_CHANNEL_TOKEN } from '@/consts/provider-tokens';
+import { RABBITMQ_CHANNEL_TOKEN } from '@/core/consts/provider-tokens';
 
 import {
 	ImageTask,
@@ -16,8 +16,8 @@ import { EnvService } from '@/shared/modules/env/env.service';
 import { parseExif } from '@/shared/utils/exif-reader';
 
 @Injectable()
-export class ImageProcessorService implements OnModuleInit {
-	readonly #logger = new Logger(ImageProcessorService.name);
+export class RmqWorkerService implements OnModuleInit {
+	readonly #logger = new Logger(RmqWorkerService.name);
 
 	constructor(
 		@InjectModel(ImageTask.name)

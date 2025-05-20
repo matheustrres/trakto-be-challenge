@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Channel } from 'amqplib';
 import { Model } from 'mongoose';
 
-import { RABBITMQ_CHANNEL_TOKEN } from '@/consts/provider-tokens';
+import { RABBITMQ_CHANNEL_TOKEN } from '@/core/consts/provider-tokens';
 
 import {
 	ImageTask,

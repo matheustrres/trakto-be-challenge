@@ -6,19 +6,28 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { LoggerModule } from 'nestjs-pino';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { BrokerModule } from './shared/modules/broker/broker.module';
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
 
 import { GlobalExceptionFilter } from '@/shared/lib/exceptions/global-exception-filter';
 import { ZodExceptionFilter } from '@/shared/lib/exceptions/zod-exception-filter';
+import { RmqModule } from '@/shared/libs/rmq/rmq.module';
 import { DatabaseModule } from '@/shared/modules/database/database.module';
+import { EnvModule } from '@/shared/modules/env/env.module';
+import { EnvService } from '@/shared/modules/env/env.service';
 
 const exceptionFilters = [GlobalExceptionFilter, ZodExceptionFilter];
 
 @Module({
 	imports: [
-		BrokerModule,
+		RmqModule.forRootAsync({
+			imports: [EnvModule, DatabaseModule],
+			useFactory: async (envService: EnvService) => ({
+				queueName: envService.getKeyOrThrow('RABBITMQ_IMAGE_OPTIMIZE_QUEUE'),
+				url: envService.getKeyOrThrow('RABBITMQ_URL'),
+			}),
+			inject: [EnvService],
+		}),
 		DatabaseModule,
 		MulterModule.register({
 			storage: memoryStorage(),

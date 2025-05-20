@@ -8,9 +8,16 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - ./:/app
       - pnpm-store:/root/.local/share/pnpm/store/v3
+      - uploads-data:/tmp/uploads
+      - images-data:/images
     ports:
       - ${PORT}:${PORT}
     networks: [app-tier]

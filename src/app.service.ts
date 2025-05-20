@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { ImageProducerService } from '@/shared/modules/broker/services/image-producer.service';
+import { ImageProducerService } from '@/shared/libs/rmq/services/image-producer.service';
 import {
 	ImageTask,
 	ImageTaskStatusEnum,
