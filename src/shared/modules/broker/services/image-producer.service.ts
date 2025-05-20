@@ -25,7 +25,10 @@ export class ImageProducerService {
 		private readonly envService: EnvService,
 	) {}
 
-	async enqueue(file: Express.Multer.File): Promise<string> {
+	async enqueue(file: Express.Multer.File): Promise<{
+		taskId: string;
+		status: ImageTaskStatusEnum;
+	}> {
 		const taskId = randomUUID();
 
 		const uploadDir = '/tmp/uploads';
@@ -37,7 +40,7 @@ export class ImageProducerService {
 		);
 		await fs.promises.writeFile(tmpPath, file.buffer);
 
-		await this.imageTaskModel.create({
+		const task = await this.imageTaskModel.create({
 			taskId,
 			originalFilename: file.originalname,
 			status: ImageTaskStatusEnum.Pending,
@@ -49,6 +52,9 @@ export class ImageProducerService {
 			{ persistent: true },
 		);
 
-		return taskId;
+		return {
+			taskId,
+			status: task.status,
+		};
 	}
 }

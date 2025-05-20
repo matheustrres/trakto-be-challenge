@@ -17,7 +17,7 @@ export class ImageTask {
 		enum: Object.values(ImageTask),
 		default: ImageTaskStatusEnum.Pending,
 	})
-	status!: string;
+	status!: ImageTaskStatusEnum;
 
 	@Prop()
 	originalFilename!: string;
