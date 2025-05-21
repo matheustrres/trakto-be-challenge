@@ -4,7 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from '@/app.service';
 
 import { ImageProducerService } from '@/shared/libs/rmq/services/image-producer.service';
-import { ImageTask } from '@/shared/modules/database/schemas/image-task.schema';
+import {
+	ImageTask,
+	ImageTaskStatusEnum,
+} from '@/shared/modules/database/schemas/image-task.schema';
 
 describe(AppService.name, () => {
 	let appService: AppService;
@@ -45,6 +48,27 @@ describe(AppService.name, () => {
 				'File is required',
 			);
 			expect(imageProducerService.enqueue).not.toHaveBeenCalled();
+		});
+
+		it('should call ImageProducerService.enqueue with right params', async () => {
+			jest.spyOn(imageProducerService, 'enqueue').mockResolvedValueOnce({
+				taskId: '123',
+				status: ImageTaskStatusEnum.Pending,
+			});
+
+			const file = {
+				destination: '/tmp/uploads',
+				fieldname: 'file',
+				filename: 'test.jpg',
+			} as Express.Multer.File;
+
+			const result = await appService.enqueueImage(file);
+
+			expect(result).toStrictEqual({
+				taskId: '123',
+				status: ImageTaskStatusEnum.Pending,
+			});
+			expect(imageProducerService.enqueue).toHaveBeenCalledWith(file);
 		});
 	});
 });
