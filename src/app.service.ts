@@ -3,20 +3,15 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { ImageProducerService } from '@/shared/libs/rmq/services/image-producer.service';
-import {
-	ImageTask,
-	ImageTaskStatusEnum,
-} from '@/shared/modules/database/schemas/image-task.schema';
+import { ImageTaskRepository } from '@/shared/modules/database/repositories/image-task.repository';
+import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
 
 @Injectable()
 export class AppService {
 	constructor(
-		@InjectModel(ImageTask.name)
-		private readonly imageTaskModel: Model<ImageTask>,
+		private readonly imageTaskRepository: ImageTaskRepository,
 		private readonly imageProducerService: ImageProducerService,
 	) {}
 
@@ -34,7 +29,7 @@ export class AppService {
 	}
 
 	async getImageTaskStatus(taskId: string): Promise<ImageTaskStatusEnum> {
-		const task = await this.imageTaskModel.findOne({ taskId }).exec();
+		const task = await this.imageTaskRepository.findOne(taskId);
 		if (!task) {
 			throw new NotFoundException('Task not found');
 		}

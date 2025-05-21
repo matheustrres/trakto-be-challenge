@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { DatabaseService } from './database.service';
+import { ImageTaskRepository } from './repositories/image-task.repository';
 import { ImageTask, ImageTaskSchema } from './schemas/image-task.schema';
 
 import { EnvModule } from '@/shared/modules/env/env.module';
@@ -25,7 +26,7 @@ import { EnvService } from '@/shared/modules/env/env.service';
 			inject: [EnvService],
 		}),
 	],
-	providers: [DatabaseService],
-	exports: [DatabaseService, MongooseModule],
+	providers: [DatabaseService, ImageTaskRepository],
+	exports: [DatabaseService, MongooseModule, ImageTaskRepository],
 })
 export class DatabaseModule {}

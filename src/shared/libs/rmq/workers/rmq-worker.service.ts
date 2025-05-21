@@ -1,14 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { ConsumeMessage } from 'amqplib';
-import { Model } from 'mongoose';
 
 import { RmqService } from '@/shared/libs/rmq/rmq.service';
 import { SharpService } from '@/shared/libs/sharp/sharp.service';
-import {
-	ImageTask,
-	ImageTaskStatusEnum,
-} from '@/shared/modules/database/schemas/image-task.schema';
+import { ImageTaskRepository } from '@/shared/modules/database/repositories/image-task.repository';
+import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
 import { EnvService } from '@/shared/modules/env/env.service';
 
 @Injectable()
@@ -16,8 +12,7 @@ export class RmqWorkerService implements OnModuleInit {
 	readonly #logger = new Logger(RmqWorkerService.name);
 
 	constructor(
-		@InjectModel(ImageTask.name)
-		private readonly imageTaskModel: Model<ImageTask>,
+		private readonly imageTaskRepository: ImageTaskRepository,
 		private readonly envService: EnvService,
 		private readonly rmqService: RmqService,
 		private readonly sharpService: SharpService,
@@ -37,10 +32,11 @@ export class RmqWorkerService implements OnModuleInit {
 		this.#logger.log(`Processing image task ${taskId} (${tmpPath})`);
 
 		try {
-			await this.imageTaskModel.updateOne(
-				{ taskId },
-				{ status: ImageTaskStatusEnum.Processing },
-			);
+			await this.imageTaskRepository.updateOne({
+				taskId,
+				status: ImageTaskStatusEnum.Processing,
+				processedAt: new Date(),
+			});
 
 			const { originalMetadata, versions } =
 				await this.sharpService.processImage(
@@ -48,26 +44,25 @@ export class RmqWorkerService implements OnModuleInit {
 					`/images/${taskId}-${Date.now()}`,
 				);
 
-			await this.imageTaskModel.updateOne(
-				{ taskId },
-				{
-					status: ImageTaskStatusEnum.Completed,
-					processedAt: new Date(),
-					original_metadata: originalMetadata,
-					versions,
+			await this.imageTaskRepository.updateOne({
+				taskId,
+				status: ImageTaskStatusEnum.Completed,
+				originalMetadata: {
+					height: originalMetadata.height,
+					width: originalMetadata.width,
+					mimetype: originalMetadata.format,
+					exif: originalMetadata.exif,
 				},
-			);
+				versions,
+			});
 
 			this.#logger.log(`✔ Image task ${taskId} sucessfully processed`);
 		} catch (error) {
-			await this.imageTaskModel.updateOne(
-				{ taskId },
-				{
-					status: ImageTaskStatusEnum.Failed,
-					errorMessage: (error as Error).message,
-					processedAt: new Date(),
-				},
-			);
+			await this.imageTaskRepository.updateOne({
+				taskId,
+				status: ImageTaskStatusEnum.Failed,
+				errorMessage: (error as Error).message,
+			});
 			throw error;
 		}
 	}

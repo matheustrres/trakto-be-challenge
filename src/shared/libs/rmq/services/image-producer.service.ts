@@ -3,16 +3,12 @@ import fs from 'node:fs';
 import path, { extname } from 'node:path';
 
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { Channel } from 'amqplib';
-import { Model } from 'mongoose';
 
 import { RABBITMQ_CHANNEL_TOKEN } from '@/core/consts/provider-tokens';
 
-import {
-	ImageTask,
-	ImageTaskStatusEnum,
-} from '@/shared/modules/database/schemas/image-task.schema';
+import { ImageTaskRepository } from '@/shared/modules/database/repositories/image-task.repository';
+import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
 import { EnvService } from '@/shared/modules/env/env.service';
 
 @Injectable()
@@ -20,8 +16,7 @@ export class ImageProducerService {
 	constructor(
 		@Inject(RABBITMQ_CHANNEL_TOKEN)
 		private readonly channel: Channel,
-		@InjectModel(ImageTask.name)
-		private readonly imageTaskModel: Model<ImageTask>,
+		private readonly imageTaskRepository: ImageTaskRepository,
 		private readonly envService: EnvService,
 	) {}
 
@@ -40,10 +35,15 @@ export class ImageProducerService {
 		);
 		await fs.promises.writeFile(tmpPath, file.buffer);
 
-		const task = await this.imageTaskModel.create({
+		const task = await this.imageTaskRepository.create({
 			taskId,
 			originalFilename: file.originalname,
 			status: ImageTaskStatusEnum.Pending,
+			originalMetadata: {
+				height: 0,
+				width: 0,
+				mimetype: file.mimetype,
+			},
 		});
 
 		this.channel.sendToQueue(

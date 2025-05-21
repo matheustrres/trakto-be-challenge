@@ -1,16 +1,14 @@
-import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppService } from '@/app.service';
 
 import { ImageProducerService } from '@/shared/libs/rmq/services/image-producer.service';
-import {
-	ImageTask,
-	ImageTaskStatusEnum,
-} from '@/shared/modules/database/schemas/image-task.schema';
+import { ImageTaskRepository } from '@/shared/modules/database/repositories/image-task.repository';
+import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
 
 describe(AppService.name, () => {
 	let appService: AppService;
+	let imageTaskRepository: ImageTaskRepository;
 	let imageProducerService: ImageProducerService;
 
 	beforeEach(async () => {
@@ -18,8 +16,8 @@ describe(AppService.name, () => {
 			providers: [
 				AppService,
 				{
-					provide: getModelToken(ImageTask.name),
-					useValue: {},
+					provide: ImageTaskRepository,
+					useValue: { findOne: jest.fn() },
 				},
 				{
 					provide: ImageProducerService,
@@ -31,6 +29,7 @@ describe(AppService.name, () => {
 		}).compile();
 
 		appService = app.get<AppService>(AppService);
+		imageTaskRepository = app.get<ImageTaskRepository>(ImageTaskRepository);
 		imageProducerService = app.get<ImageProducerService>(ImageProducerService);
 	});
 
