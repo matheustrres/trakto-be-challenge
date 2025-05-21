@@ -70,4 +70,17 @@ describe(AppService.name, () => {
 			expect(imageProducerService.enqueue).toHaveBeenCalledWith(file);
 		});
 	});
+
+	describe('.getImageTaskStatus', () => {
+		it('should throw an error if no task is found', async () => {
+			jest.spyOn(imageTaskRepository, 'findOne').mockResolvedValueOnce(null);
+
+			const taskId = '123';
+
+			await expect(appService.getImageTaskStatus(taskId)).rejects.toThrow(
+				'Task not found',
+			);
+			expect(imageTaskRepository.findOne).toHaveBeenCalledWith(taskId);
+		});
+	});
 });
