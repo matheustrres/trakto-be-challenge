@@ -1,13 +1,12 @@
 import fs from 'node:fs';
 
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Channel, ConsumeMessage } from 'amqplib';
+import { ConsumeMessage } from 'amqplib';
 import { Model } from 'mongoose';
 import sharp from 'sharp';
 
-import { RABBITMQ_CHANNEL_TOKEN } from '@/core/consts/provider-tokens';
-
+import { RmqService } from '@/shared/libs/rmq/rmq.service';
 import {
 	ImageTask,
 	ImageTaskStatusEnum,
@@ -22,7 +21,7 @@ export class RmqWorkerService implements OnModuleInit {
 	constructor(
 		@InjectModel(ImageTask.name)
 		private readonly imageTaskModel: Model<ImageTask>,
-		@Inject(RABBITMQ_CHANNEL_TOKEN) private readonly channel: Channel,
+		private readonly rmqService: RmqService,
 		private readonly envService: EnvService,
 	) {}
 
@@ -30,22 +29,13 @@ export class RmqWorkerService implements OnModuleInit {
 		const queue = this.envService.getKeyOrThrow(
 			'RABBITMQ_IMAGE_OPTIMIZE_QUEUE',
 		);
-		await this.channel.assertQueue(queue, { durable: true });
-		await this.channel.prefetch(1);
-
-		this.#logger.log(`⏳ Listening on queue "${queue}"`);
-		await this.channel.consume(
-			queue,
-			async (msg) => await this.#handleMessage(msg),
-			{
-				noAck: false,
-			},
+		return this.rmqService.consumeQueue(queue, (msg) =>
+			this.#handleMessage(msg),
 		);
 	}
 
 	async #handleMessage(msg: ConsumeMessage | null): Promise<void> {
-		if (!msg) return;
-		const { taskId, tmpPath } = JSON.parse(msg.content.toString());
+		const { taskId, tmpPath } = JSON.parse(msg!.content.toString());
 		this.#logger.log(`Processing image task ${taskId} (${tmpPath})`);
 
 		try {
@@ -106,13 +96,8 @@ export class RmqWorkerService implements OnModuleInit {
 				},
 			);
 
-			this.channel.ack(msg);
 			this.#logger.log(`✔ Image task ${taskId} sucessfully processed`);
 		} catch (error) {
-			this.#logger.log(
-				`Error processing image task ${taskId}`,
-				(error as Error).stack,
-			);
 			await this.imageTaskModel.updateOne(
 				{ taskId },
 				{
@@ -121,7 +106,7 @@ export class RmqWorkerService implements OnModuleInit {
 					processedAt: new Date(),
 				},
 			);
-			this.channel.nack(msg, false, false);
+			throw error;
 		}
 	}
 }

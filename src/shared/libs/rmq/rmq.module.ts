@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import amqp, { Channel } from 'amqplib';
 
+import { RmqService } from './rmq.service';
 import { ImageProducerService } from './services/image-producer.service';
 
 import {
@@ -55,11 +56,13 @@ export class RmqModule {
 				urlProvider,
 				queueProvider,
 				ImageProducerService,
+				RmqService,
 			],
 			exports: [
 				RABBITMQ_CHANNEL_TOKEN,
 				RABBITMQ_QUEUE_TOKEN,
 				ImageProducerService,
+				RmqService,
 			],
 		};
 	}
@@ -102,11 +105,13 @@ export class RmqModule {
 				urlProvider,
 				queueProvider,
 				ImageProducerService,
+				RmqService,
 			],
 			exports: [
 				RABBITMQ_CHANNEL_TOKEN,
 				RABBITMQ_QUEUE_TOKEN,
 				ImageProducerService,
+				RmqService,
 			],
 		};
 	}
