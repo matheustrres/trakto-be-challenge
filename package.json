@@ -6,8 +6,8 @@
 	"private": true,
 	"license": "MIT",
 	"scripts": {
-		"docker:prod": "docker compose up --build",
-		"docker:dev": "npm run docker:prod && docker compose -f docker-compose.dev.yml up --build",
+		"docker:prod": "docker compose up --build -d",
+		"docker:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
 		"prebuild": "rm -rf dist",
 		"build": "nest build -p ./tsconfig.build.json -c ./nest-cli.json -b swc",
 		"format": "prettier --write \"{src,tests}/**/*.ts\"",
