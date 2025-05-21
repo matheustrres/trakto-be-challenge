@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { RmqWorkerService } from './rmq-worker.service';
 
 import { RmqModule } from '@/shared/libs/rmq/rmq.module';
+import { SharpModule } from '@/shared/libs/sharp/sharp.module';
 import { DatabaseModule } from '@/shared/modules/database/database.module';
 import { EnvModule } from '@/shared/modules/env/env.module';
 import { EnvService } from '@/shared/modules/env/env.service';
@@ -11,6 +12,7 @@ import { EnvService } from '@/shared/modules/env/env.service';
 	imports: [
 		EnvModule,
 		DatabaseModule,
+		SharpModule,
 		RmqModule.forRootAsync({
 			imports: [EnvModule, DatabaseModule],
 			useFactory: (envService: EnvService) => ({
