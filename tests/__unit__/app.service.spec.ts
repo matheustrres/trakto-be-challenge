@@ -4,7 +4,10 @@ import { AppService } from '@/app.service';
 
 import { ImageProducerService } from '@/shared/libs/rmq/services/image-producer.service';
 import { ImageTaskRepository } from '@/shared/modules/database/repositories/image-task.repository';
-import { ImageTaskStatusEnum } from '@/shared/modules/database/schemas/image-task.schema';
+import {
+	ImageTask,
+	ImageTaskStatusEnum,
+} from '@/shared/modules/database/schemas/image-task.schema';
 
 describe(AppService.name, () => {
 	let appService: AppService;
@@ -81,6 +84,25 @@ describe(AppService.name, () => {
 				'Task not found',
 			);
 			expect(imageTaskRepository.findOne).toHaveBeenCalledWith(taskId);
+		});
+
+		it('should return the task status if task is found', async () => {
+			const task: ImageTask = {
+				taskId: '123',
+				originalFilename: 'test.jpg',
+				status: ImageTaskStatusEnum.Pending,
+				originalMetadata: {
+					height: 100,
+					width: 100,
+					mimetype: 'image/jpeg',
+				},
+			};
+
+			jest.spyOn(imageTaskRepository, 'findOne').mockResolvedValueOnce(task);
+
+			const result = await appService.getImageTaskStatus(task.taskId);
+
+			expect(result).toBe('PENDING');
 		});
 	});
 });
